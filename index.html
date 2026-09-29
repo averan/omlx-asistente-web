@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Faena · Asistente local</title>
+  <meta name="description" content="Demo de un asistente de IA que se ejecuta en local con oMLX.">
+  <link rel="icon" href="img/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="assistant/assistant.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a href="#" class="brand" aria-label="Faena — inicio"><img class="brand-symbol" src="img/faena-symbol.png" alt=""><img class="brand-wordmark" src="img/faena-wordmark.png" alt="Faena CS"></a>
+      <nav aria-label="Principal">
+        <a href="#caracteristicas">Características</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#faq">Preguntas</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <p class="eyebrow">Inteligencia artificial en tu Mac</p>
+        <h1>Tu asistente local,<br><em>privado y rápido.</em></h1>
+        <p class="lead">Un modelo de lenguaje que se ejecuta en tu propio equipo con oMLX. Sin enviar datos a la nube, sin esperas, sin cuotas.</p>
+        <div class="hero-actions">
+          <button class="btn primary" type="button" data-open-assistant>Hablar con el asistente</button>
+          <a class="btn ghost" href="#como-funciona">Cómo funciona</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="caracteristicas" class="section">
+      <div class="container">
+        <h2 class="section-title">Pensado para trabajar en local</h2>
+        <div class="features">
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z"/></svg>
+            </div>
+            <h3>Privacidad total</h3>
+            <p>Tus preguntas nunca salen de tu equipo. El modelo corre en tu Mac y responde desde ahí.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg>
+            </div>
+            <h3>Apple Silicon</h3>
+            <p>oMLX aprovecha la memoria unificada y la GPU de los chips M para generar texto con fluidez.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 12h4l3-7 4 14 3-7h2"/></svg>
+            </div>
+            <h3>Respuestas en streaming</h3>
+            <p>El texto aparece palabra a palabra, igual que en los asistentes en la nube.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13 4l-2 16"/></svg>
+            </div>
+            <h3>API compatible</h3>
+            <p>Habla el mismo idioma que la API de OpenAI, así que cualquier herramienta puede conectarse.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="como-funciona" class="section alt">
+      <div class="container">
+        <h2 class="section-title">Cómo funciona</h2>
+        <ol class="steps">
+          <li><span class="step-n">1</span><div><h3>Arranca oMLX</h3><p>El servidor carga un modelo MLX y expone una API en <code>localhost:8000</code>.</p></div></li>
+          <li><span class="step-n">2</span><div><h3>Abre el asistente</h3><p>Pulsa el botón de la esquina inferior derecha. Detecta solo qué modelo está cargado.</p></div></li>
+          <li><span class="step-n">3</span><div><h3>Pregunta lo que quieras</h3><p>La conversación se guarda en tu navegador para que puedas retomarla después.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="container narrow">
+        <h2 class="section-title">Preguntas frecuentes</h2>
+        <details class="faq"><summary>¿Necesito conexión a internet?</summary><p>No para conversar: el modelo se ejecuta en tu equipo. Solo hace falta que oMLX esté en marcha.</p></details>
+        <details class="faq"><summary>¿Qué modelo usa el asistente?</summary><p>El que tengas cargado en oMLX en ese momento. Si no hay ninguno cargado, usa el modelo por defecto del servidor.</p></details>
+        <details class="faq"><summary>¿Dónde se guardan mis conversaciones?</summary><p>Solo en el almacenamiento local de este navegador. Puedes borrarlas con «Nueva conversación».</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container"><img class="footer-logo" src="img/faena-symbol.png" alt="" width="28" height="28"><div>Faena · demo local con oMLX</div></div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="config.local.js"></script>
+  <script src="contexto.js"></script>
+  <script src="assistant/assistant.js"></script>
+  <script>
+    document.querySelectorAll('[data-open-assistant]').forEach(b => b.addEventListener('click', () => window.omlxAssistant?.open()));
+  </script>
+</body>
+</html>

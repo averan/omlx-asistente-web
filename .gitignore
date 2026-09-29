@@ -1,0 +1,6 @@
+# Configuración privada (API key)
+config.local.js
+
+# Sistema y editor
+.DS_Store
+.claude/
