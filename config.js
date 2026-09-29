@@ -10,13 +10,13 @@ window.OMLX_ASSISTANT = {
   modelLabel: 'Faena-Bot',
   // Imagen de la cabecera del panel (vacío = degradado de color)
   avatar: 'img/faena-symbol.png',
-  greeting: '¡Hola! Soy tu asistente local. ¿En qué puedo ayudarte?',
+  greeting: 'Hola, soy Faena-Bot de la Mesa de Soporte. Cuéntame qué pasa; puedes adjuntar pantallazos o logs con el clip.',
   // Instrucciones generales extra. Lo principal (identidad, conocimiento, temas,
   // reglas y respuestas a preguntas) se define en contexto.js
   systemPrompt: 'Usa Markdown cuando ayude a la claridad.',
 
   maxTokens: 1024,
-  temperature: 0.7,
+  temperature: 0.4, // baja = respuestas más consistentes (útil para clasificar casos)
   // true = el modelo "piensa" antes de responder (más lento, a veces mejor)
   enableThinking: false,
 

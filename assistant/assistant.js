@@ -90,12 +90,14 @@
     chat: '<svg class="oa-ic-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>',
     close: '<svg class="oa-ic-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',
     reset: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
+    expand: '<svg class="oa-ic-expand" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>',
+    shrink: '<svg class="oa-ic-shrink" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>',
     send: '<svg class="oa-ic-send" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
     stop: '<svg class="oa-ic-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
     clip: '<svg viewBox="0 0 24 24"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 7"/></svg>',
     file: '<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
   };
-  const ACCEPT = 'image/*,.pdf,.docx,.xlsx,.xls,.csv,.tsv,.txt,.md,.markdown,.json,.xml,.html,.htm,.css,.js,.ts,.jsx,.tsx,.py,.java,.c,.h,.cpp,.cs,.go,.rs,.rb,.php,.swift,.kt,.sh,.sql,.yaml,.yml,.toml,.ini,.log,.tex,.rtf';
+  const ACCEPT = 'image/*,.pdf,.docx,.xlsx,.xls,.csv,.tsv,.txt,.md,.markdown,.json,.xml,.html,.htm,.css,.js,.ts,.jsx,.tsx,.py,.java,.c,.h,.cpp,.cs,.go,.rs,.rb,.php,.swift,.kt,.sh,.sql,.yaml,.yml,.toml,.ini,.log,.out,.err,.trace,.tex,.rtf';
   const root = document.createElement('div');
   root.className = 'oa-root';
   root.innerHTML = `
@@ -106,6 +108,7 @@
           <strong id="oa-title"></strong>
           <div class="oa-status"><span class="oa-dot" data-state="checking"></span><span class="oa-status-text">Conectando…</span></div>
         </div>
+        <button class="oa-icon-btn oa-expand" type="button" title="Ampliar ventana" aria-label="Ampliar ventana" aria-pressed="false">${ICONS.expand}${ICONS.shrink}</button>
         <button class="oa-icon-btn oa-reset" type="button" title="Nueva conversación" aria-label="Nueva conversación">${ICONS.reset}</button>
         <button class="oa-icon-btn oa-close" type="button" title="Cerrar" aria-label="Cerrar asistente">${ICONS.close.replace('oa-ic-close', '')}</button>
       </header>
@@ -120,6 +123,9 @@
         </div>
         <div class="oa-footnote">Se ejecuta en local con oMLX · imágenes, PDF, Word, Excel y texto</div>
       </form>
+      <div class="oa-resize oa-resize-n" data-dir="n" aria-hidden="true"></div>
+      <div class="oa-resize oa-resize-w" data-dir="w" aria-hidden="true"></div>
+      <div class="oa-resize oa-resize-nw" data-dir="nw" aria-hidden="true" title="Arrastra para cambiar el tamaño · doble clic para restaurar"></div>
       <div class="oa-drop" aria-hidden="true"><div>${ICONS.clip}<span>Suelta aquí tus archivos</span></div></div>
     </section>
     <button class="oa-launcher" type="button" aria-controls="oa-panel" aria-expanded="false" aria-label="Abrir asistente">
@@ -133,6 +139,50 @@
   const tray = $('.oa-tray'), fileInput = $('.oa-file');
   $('#oa-title').textContent = cfg.assistantName;
   if (cfg.avatar) $('.oa-avatar').replaceWith(Object.assign(document.createElement('img'), { className: 'oa-avatar oa-avatar-img', src: cfg.avatar, alt: '' }));
+
+  // ---------- tamaño del panel (arrastrar bordes / ampliar) ----------
+  const expandBtn = $('.oa-expand');
+  const MIN_W = 320, MIN_H = 380;
+  const maxW = () => window.innerWidth - 48, maxH = () => window.innerHeight - 124;
+  function applySize() {
+    const size = store.get('size', null), expanded = store.get('expanded', false);
+    root.classList.toggle('oa-expanded', expanded);
+    expandBtn.setAttribute('aria-pressed', String(expanded));
+    const label = expanded ? 'Restaurar tamaño' : 'Ampliar ventana';
+    expandBtn.title = label; expandBtn.setAttribute('aria-label', label);
+    if (size && !expanded) { panel.style.setProperty('--oa-w', size.w + 'px'); panel.style.setProperty('--oa-h', size.h + 'px'); }
+    else { panel.style.removeProperty('--oa-w'); panel.style.removeProperty('--oa-h'); }
+  }
+  expandBtn.addEventListener('click', () => { store.set('expanded', !store.get('expanded', false)); applySize(); scrollToEnd(false); });
+  root.querySelectorAll('.oa-resize').forEach(h => {
+    h.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const dir = h.dataset.dir, sx = e.clientX, sy = e.clientY;
+      const sw = panel.offsetWidth, sh = panel.offsetHeight;
+      if (store.get('expanded', false)) { store.set('expanded', false); root.classList.remove('oa-expanded'); expandBtn.setAttribute('aria-pressed', 'false'); }
+      try { h.setPointerCapture(e.pointerId); } catch {}
+      root.classList.add('oa-resizing');
+      let size = { w: sw, h: sh };
+      const move = ev => {
+        const w = dir.includes('w') ? sw + (sx - ev.clientX) : sw;
+        const hh = dir.includes('n') ? sh + (sy - ev.clientY) : sh;
+        size = { w: Math.round(Math.min(Math.max(w, MIN_W), maxW())), h: Math.round(Math.min(Math.max(hh, MIN_H), maxH())) };
+        panel.style.setProperty('--oa-w', size.w + 'px');
+        panel.style.setProperty('--oa-h', size.h + 'px');
+      };
+      const up = () => {
+        h.removeEventListener('pointermove', move);
+        root.classList.remove('oa-resizing');
+        store.set('size', size); applySize();
+      };
+      h.addEventListener('pointermove', move);
+      h.addEventListener('pointerup', up, { once: true });
+      h.addEventListener('pointercancel', up, { once: true });
+    });
+    h.addEventListener('dblclick', () => { store.set('size', null); store.set('expanded', false); applySize(); });
+  });
+  applySize();
 
   // ---------- abrir / cerrar ----------
   function setOpen(open, { focus = true } = {}) {
@@ -285,7 +335,8 @@
 
   // ---------- adjuntos ----------
   const fmtSize = b => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1048576).toFixed(1)} MB`;
-  const TEXT_EXT = /\.(txt|md|markdown|csv|tsv|json|xml|html?|css|jsx?|tsx?|py|java|c|h|cpp|cs|go|rs|rb|php|swift|kt|sh|sql|ya?ml|toml|ini|log|tex|rtf)$/i;
+  const TEXT_EXT = /\.(txt|md|markdown|csv|tsv|json|xml|html?|css|jsx?|tsx?|py|java|c|h|cpp|cs|go|rs|rb|php|swift|kt|sh|sql|ya?ml|toml|ini|log|out|err|trace|tex|rtf)$/i;
+  const LOG_EXT = /\.(log|out|err|trace)(\.\d+)?$/i; // en los logs lo relevante suele estar al final
   const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/';
   const LIBS = {
     pdf: CDN + 'pdf.js/3.11.174/pdf.min.js',
@@ -348,11 +399,13 @@
     if (name.endsWith('.pdf') || file.type === 'application/pdf') r = await readPdf(file);
     else if (name.endsWith('.docx')) r = await readDocx(file);
     else if (/\.xlsx?$/.test(name)) r = await readXlsx(file);
-    else if (file.type.startsWith('text/') || TEXT_EXT.test(name) || file.type === 'application/json') r = { text: (await file.text()).trim() };
+    else if (file.type.startsWith('text/') || TEXT_EXT.test(name) || LOG_EXT.test(name) || file.type === 'application/json') r = { text: (await file.text()).trim() };
     else throw new Error('Formato no compatible. Usa imágenes, PDF, Word (.docx), Excel o archivos de texto.');
     if (!r.text) throw new Error('El documento está vacío.');
     const chars = r.text.length;
-    if (chars > cfg.maxDocChars) r.text = r.text.slice(0, cfg.maxDocChars) + `\n\n[… documento recortado: se enviaron ${cfg.maxDocChars.toLocaleString('es')} de ${chars.toLocaleString('es')} caracteres]`;
+    const n = cfg.maxDocChars.toLocaleString('es'), total = chars.toLocaleString('es');
+    if (chars > cfg.maxDocChars && LOG_EXT.test(name)) r.text = `[… log recortado: se omitió el inicio; se envían los últimos ${n} de ${total} caracteres]\n\n` + r.text.slice(-cfg.maxDocChars);
+    else if (chars > cfg.maxDocChars) r.text = r.text.slice(0, cfg.maxDocChars) + `\n\n[… documento recortado: se enviaron ${n} de ${total} caracteres]`;
     return { type: 'doc', text: r.text, info: [r.info, chars > cfg.maxDocChars ? 'recortado' : (chars < 1000 ? `${chars} caract.` : `${Math.round(chars / 1000)}k caract.`)].filter(Boolean).join(' · ') };
   }
 
